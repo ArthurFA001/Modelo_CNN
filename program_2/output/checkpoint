@@ -1,0 +1,2 @@
+model_checkpoint_path: "Example_training_1228_TCGA_samples.save"
+all_model_checkpoint_paths: "Example_training_1228_TCGA_samples.save"
