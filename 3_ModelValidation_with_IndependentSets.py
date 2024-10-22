@@ -3,7 +3,7 @@ CNN model build with Keras
 Created date : 18/12/18 
 author : MOLA lIN
 """
-###  ----------------------------------------------------------------------
+###  Validación de modelos con conjuntos -------------------------------------------
 import os
 import sys
 os.environ ["CUDA_VISIBLE_DEVICES"] = "0"  # assign specific graphic card
@@ -25,9 +25,10 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 import keras.backend as K
 
 ###  ----------------------------------------------------------------------
-###  Build save_train_history to save training processes
+###  Se crea save_train_history para guardar los procesos de entrenamiento
 ###  ----------------------------------------------------------------------
-def save_train_history ( train_history, train, validation, name ):
+def save_trai
+n_history ( train_history, train, validation, name ):
     plt.plot ( train_history.history[train] )
     plt.plot ( train_history.history[validation] )
     plt.title ( 'Train History' )
@@ -57,33 +58,34 @@ def MCC(y_true, y_pred): # Matthews correlation coefficient
     return numerator / (denominator + K.epsilon())
 
 ###  ----------------------------------------------------------------------
-###  Load training data and its label
-###  and do the input-format convertion
+###  Carga de datos de entrenamiento y etiquetas
+###  y hacer la conversion del formato de entrata
 ###  ----------------------------------------------------------------------
-# load testing data
+# Carga de datos de validacion
 testing_set = sys.argv[0] = "C:/Users/artur/Documents/Replicacion de articulos/Ambiente virtual TF 3.7/CNN_model/program_1/output/Example_validation_4908_TCGA_samples.npy"
 test_sample = np.load ( testing_set )
 test_sample = test_sample.reshape ( (test_sample.shape[0], 100, 100, 1) ) # no. of samples, x pixels, y pixels, no. of files
 
-# load labels of testing data
+# Carga de etiquetas de datos de validacion
 testing_label = sys.argv[0] = "C:/Users/artur/Documents/Replicacion de articulos/Ambiente virtual TF 3.7/CNN_model/program_1/output/Example_validation_4908_TCGA_samples_label.npy"
 test_label = np.load ( testing_label )
 test_label_compare = test_label
 test_label = np_utils.to_categorical ( test_label )
 
-# load testing data's title
+# Carga el titulo de los datos de validacion
 filename_list = sys.argv[0] = "C:/Users/artur/Documents/Replicacion de articulos/Ambiente virtual TF 3.7/CNN_model/program_1/output/Example_validation_4908_TCGA_samples_title.npy"
 test_sample_title = np.load ( filename_list )
 
+# Carga los pesos del modelo entrenado previamente
 input_save_model = sys.argv[0] = "C:/Users/artur/Documents/Replicacion de articulos/Ambiente virtual TF 3.7/CNN_model/program_2/output/Example_training_1228_TCGA_samples.save"
-time = DT.now() #system time for output file name
+time = DT.now() # Hora del sistema para el nombre del archivo de salida
 time = str(time.year) + str(time.month) + str(time.day) + str(time.hour) + str(time.minute)
 out=open( os.path.splitext(os.path.basename(testing_set))[0] + "_predicted_result_"+time,"w" )
 print("Training model from "+input_save_model, file=out)
 print("Indenpendent set from "+testing_set, file=out)
 
 ###  ----------------------------------------------------------------------
-###  build CNN model
+###  Construccion del modelo CNN
 ###  ----------------------------------------------------------------------
 model = Sequential()
 
@@ -111,7 +113,7 @@ model.add ( Dense ( 80, activation = "relu" ) )
 model.add ( Dense ( 12, activation = "softmax" ) )
 
 ###  ----------------------------------------------------------------------
-###  load weight from previous training / Best performance
+### Carga de los pesos del entrenamiento anterior / Mejor rendimiento
 ###  ----------------------------------------------------------------------
 try:
   model.load_weights ( input_save_model )
@@ -120,20 +122,21 @@ except:
   print ( "Failed to load previous data, training new model below." )
 
 ###  ----------------------------------------------------------------------
-###  compile and run the model with input
+###  Compilar y ejecutar el modelo con entrada
 ###  ----------------------------------------------------------------------
 Adam = Adam ( lr = 1e-4 )
 model.compile ( loss = 'categorical_crossentropy',
                 optimizer = Adam, metrics = ['accuracy',MCC] )
 
 ###  ----------------------------------------------------------------------
-###  Independent Testing Results
+###  Resultados de pruebas independientes
 ###  ----------------------------------------------------------------------
-scores = model.evaluate ( test_sample, test_label, verbose = 1 )
-print ( "Independent test:\tAccuracy\t%.3f\tMCC\t%.3f\n" % ( scores[1] , scores[2]) , file=out)
+scores = model.evaluate ( test_sample, test_label, verbose = 1 ) # Evalua el rendimiento en los datos de valiacion
+# Imprime la precisión y las puntuaciones MCC del conjunto de pruebas independiente en un archivo
+print ( "Independent test:\tAccuracy\t%.3f\tMCC\t%.3f\n" % ( scores[1] , scores[2]) , file=out) 
 
 ###  ----------------------------------------------------------------------
-###  Use trained model to do the prediction
+###  Utilice el modelo entrenado para hacer la predicción
 ###  ----------------------------------------------------------------------
 Prediction = model.predict_classes ( test_sample )
 num = 0
@@ -148,7 +151,8 @@ for result in Prediction :
     num += 1
 
 ###  ----------------------------------------------------------------------
-###  confusion matrix
+###  Creacion de una matriz de confusion para visulaizar la distribucion
+###  de predicciones correctas e incorrectas entre clases
 ###  ----------------------------------------------------------------------
 import pandas as pd
 confusion_matrix = pd.crosstab(test_label_compare, Prediction,rownames=['Actual'], colnames=['Predicted'], margins=True)  # return dataframe (df) formate
